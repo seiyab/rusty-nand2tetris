@@ -1,3 +1,4 @@
+mod gates;
 mod primitive;
 
 fn main() {
