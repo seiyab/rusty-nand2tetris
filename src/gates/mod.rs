@@ -26,7 +26,7 @@ pub fn dmux(x: Bit, sel: Bit) -> (Bit, Bit) {
 
 #[cfg(test)]
 mod test {
-    use super::super::assert_pin_equals;
+    use super::super::assert_bit_equals;
     use super::*;
 
     #[test]
@@ -38,7 +38,7 @@ mod test {
     #[test]
     fn not_not_is_id() {
         for x in [Bit::Positive, Bit::Negative] {
-            assert_pin_equals!(not(not(x)), x);
+            assert_bit_equals!(not(not(x)), x);
         }
     }
 
@@ -115,7 +115,7 @@ mod test {
         for x in [Bit::Positive, Bit::Negative] {
             for sel in [Bit::Positive, Bit::Negative] {
                 let (a, b) = dmux(x, sel);
-                assert_pin_equals!(mux(a, b, sel), x);
+                assert_bit_equals!(mux(a, b, sel), x);
             }
         }
     }

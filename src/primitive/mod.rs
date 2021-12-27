@@ -17,7 +17,7 @@ impl Bit {
 }
 
 #[macro_export]
-macro_rules! assert_pin_equals {
+macro_rules! assert_bit_equals {
     ($actual:expr, $expected:expr) => {
         let a = match $actual {
             Bit::Positive => true,
@@ -37,9 +37,9 @@ mod tests {
 
     #[test]
     fn nand_works() {
-        assert_pin_equals!(Bit::Positive.nand(Bit::Positive), Bit::Negative);
-        assert_pin_equals!(Bit::Positive.nand(Bit::Negative), Bit::Positive);
-        assert_pin_equals!(Bit::Negative.nand(Bit::Positive), Bit::Positive);
-        assert_pin_equals!(Bit::Negative.nand(Bit::Negative), Bit::Positive);
+        assert_bit_equals!(Bit::Positive.nand(Bit::Positive), Bit::Negative);
+        assert_bit_equals!(Bit::Positive.nand(Bit::Negative), Bit::Positive);
+        assert_bit_equals!(Bit::Negative.nand(Bit::Positive), Bit::Positive);
+        assert_bit_equals!(Bit::Negative.nand(Bit::Negative), Bit::Positive);
     }
 }
