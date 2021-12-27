@@ -16,15 +16,30 @@ impl Pin {
     }
 }
 
+#[macro_export]
+macro_rules! assert_pin_equals {
+    ($actual:expr, $expected:expr) => {
+        let a = match $actual {
+            Pin::Positive => true,
+            Pin::Negative => false,
+        };
+        let e = match $expected {
+            Pin::Positive => true,
+            Pin::Negative => false,
+        };
+        assert!(a == e, stringify!(($actual, $expected)));
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::Pin;
 
     #[test]
     fn nand_works() {
-        assert!(matches!(Pin::Positive.nand(Pin::Positive), Pin::Negative));
-        assert!(matches!(Pin::Positive.nand(Pin::Negative), Pin::Positive));
-        assert!(matches!(Pin::Negative.nand(Pin::Positive), Pin::Positive));
-        assert!(matches!(Pin::Negative.nand(Pin::Negative), Pin::Positive));
+        assert_pin_equals!(Pin::Positive.nand(Pin::Positive), Pin::Negative);
+        assert_pin_equals!(Pin::Positive.nand(Pin::Negative), Pin::Positive);
+        assert_pin_equals!(Pin::Negative.nand(Pin::Positive), Pin::Positive);
+        assert_pin_equals!(Pin::Negative.nand(Pin::Negative), Pin::Positive);
     }
 }

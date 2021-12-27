@@ -26,12 +26,20 @@ pub fn dmux(x: Pin, sel: Pin) -> (Pin, Pin) {
 
 #[cfg(test)]
 mod test {
+    use super::super::assert_pin_equals;
     use super::*;
 
     #[test]
     fn not_works() {
         assert!(matches!(not(Pin::Positive), Pin::Negative));
         assert!(matches!(not(Pin::Negative), Pin::Positive));
+    }
+
+    #[test]
+    fn not_not_is_id() {
+        for x in [Pin::Positive, Pin::Negative] {
+            assert_pin_equals!(not(not(x)), x);
+        }
     }
 
     #[test]
@@ -100,5 +108,15 @@ mod test {
             dmux(Pin::Negative, Pin::Negative),
             (Pin::Negative, Pin::Negative),
         ));
+    }
+
+    #[test]
+    fn dmux_mux_is_id() {
+        for x in [Pin::Positive, Pin::Negative] {
+            for sel in [Pin::Positive, Pin::Negative] {
+                let (a, b) = dmux(x, sel);
+                assert_pin_equals!(mux(a, b, sel), x);
+            }
+        }
     }
 }
