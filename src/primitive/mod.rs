@@ -16,6 +16,7 @@ impl Pin {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::Pin;
 
