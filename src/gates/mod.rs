@@ -12,8 +12,11 @@ pub fn or(x: Pin, y: Pin) -> Pin {
     not(x).nand(not(y))
 }
 
+pub fn xor(x: Pin, y: Pin) -> Pin {
+    and(or(x, y), x.nand(y))
+}
+
 mod test {
-    use super::super::primitive::Pin;
     use super::*;
 
     #[test]
@@ -36,5 +39,13 @@ mod test {
         assert!(matches!(or(Pin::Positive, Pin::Negative), Pin::Positive));
         assert!(matches!(or(Pin::Negative, Pin::Positive), Pin::Positive));
         assert!(matches!(or(Pin::Negative, Pin::Negative), Pin::Negative));
+    }
+
+    #[test]
+    fn xor_works() {
+        assert!(matches!(xor(Pin::Positive, Pin::Positive), Pin::Negative));
+        assert!(matches!(xor(Pin::Positive, Pin::Negative), Pin::Positive));
+        assert!(matches!(xor(Pin::Negative, Pin::Positive), Pin::Positive));
+        assert!(matches!(xor(Pin::Negative, Pin::Negative), Pin::Negative));
     }
 }
