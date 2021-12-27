@@ -1,11 +1,11 @@
 #[derive(Clone, Copy)]
-pub enum Pin {
+pub enum Bit {
     Positive,
     Negative,
 }
 
-impl Pin {
-    pub fn nand(&self, another: Pin) -> Pin {
+impl Bit {
+    pub fn nand(&self, another: Bit) -> Bit {
         match self {
             Self::Positive => match another {
                 Self::Positive => Self::Negative,
@@ -20,12 +20,12 @@ impl Pin {
 macro_rules! assert_pin_equals {
     ($actual:expr, $expected:expr) => {
         let a = match $actual {
-            Pin::Positive => true,
-            Pin::Negative => false,
+            Bit::Positive => true,
+            Bit::Negative => false,
         };
         let e = match $expected {
-            Pin::Positive => true,
-            Pin::Negative => false,
+            Bit::Positive => true,
+            Bit::Negative => false,
         };
         assert!(a == e, stringify!(($actual, $expected)));
     };
@@ -33,13 +33,13 @@ macro_rules! assert_pin_equals {
 
 #[cfg(test)]
 mod tests {
-    use super::Pin;
+    use super::Bit;
 
     #[test]
     fn nand_works() {
-        assert_pin_equals!(Pin::Positive.nand(Pin::Positive), Pin::Negative);
-        assert_pin_equals!(Pin::Positive.nand(Pin::Negative), Pin::Positive);
-        assert_pin_equals!(Pin::Negative.nand(Pin::Positive), Pin::Positive);
-        assert_pin_equals!(Pin::Negative.nand(Pin::Negative), Pin::Positive);
+        assert_pin_equals!(Bit::Positive.nand(Bit::Positive), Bit::Negative);
+        assert_pin_equals!(Bit::Positive.nand(Bit::Negative), Bit::Positive);
+        assert_pin_equals!(Bit::Negative.nand(Bit::Positive), Bit::Positive);
+        assert_pin_equals!(Bit::Negative.nand(Bit::Negative), Bit::Positive);
     }
 }

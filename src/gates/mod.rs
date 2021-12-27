@@ -1,26 +1,26 @@
-use super::primitive::Pin;
+use super::primitive::Bit;
 
-pub fn not(x: Pin) -> Pin {
-    x.nand(Pin::Positive)
+pub fn not(x: Bit) -> Bit {
+    x.nand(Bit::Positive)
 }
 
-pub fn and(x: Pin, y: Pin) -> Pin {
+pub fn and(x: Bit, y: Bit) -> Bit {
     not(x.nand(y))
 }
 
-pub fn or(x: Pin, y: Pin) -> Pin {
+pub fn or(x: Bit, y: Bit) -> Bit {
     not(x).nand(not(y))
 }
 
-pub fn xor(x: Pin, y: Pin) -> Pin {
+pub fn xor(x: Bit, y: Bit) -> Bit {
     and(or(x, y), x.nand(y))
 }
 
-pub fn mux(x: Pin, y: Pin, sel: Pin) -> Pin {
+pub fn mux(x: Bit, y: Bit, sel: Bit) -> Bit {
     or(and(sel, x), and(not(sel), y))
 }
 
-pub fn dmux(x: Pin, sel: Pin) -> (Pin, Pin) {
+pub fn dmux(x: Bit, sel: Bit) -> (Bit, Bit) {
     (and(x, sel), and(x, not(sel)))
 }
 
@@ -31,61 +31,61 @@ mod test {
 
     #[test]
     fn not_works() {
-        assert!(matches!(not(Pin::Positive), Pin::Negative));
-        assert!(matches!(not(Pin::Negative), Pin::Positive));
+        assert!(matches!(not(Bit::Positive), Bit::Negative));
+        assert!(matches!(not(Bit::Negative), Bit::Positive));
     }
 
     #[test]
     fn not_not_is_id() {
-        for x in [Pin::Positive, Pin::Negative] {
+        for x in [Bit::Positive, Bit::Negative] {
             assert_pin_equals!(not(not(x)), x);
         }
     }
 
     #[test]
     fn and_works() {
-        assert!(matches!(and(Pin::Positive, Pin::Positive), Pin::Positive));
-        assert!(matches!(and(Pin::Positive, Pin::Negative), Pin::Negative));
-        assert!(matches!(and(Pin::Negative, Pin::Positive), Pin::Negative));
-        assert!(matches!(and(Pin::Negative, Pin::Negative), Pin::Negative));
+        assert!(matches!(and(Bit::Positive, Bit::Positive), Bit::Positive));
+        assert!(matches!(and(Bit::Positive, Bit::Negative), Bit::Negative));
+        assert!(matches!(and(Bit::Negative, Bit::Positive), Bit::Negative));
+        assert!(matches!(and(Bit::Negative, Bit::Negative), Bit::Negative));
     }
 
     #[test]
     fn or_works() {
-        assert!(matches!(or(Pin::Positive, Pin::Positive), Pin::Positive));
-        assert!(matches!(or(Pin::Positive, Pin::Negative), Pin::Positive));
-        assert!(matches!(or(Pin::Negative, Pin::Positive), Pin::Positive));
-        assert!(matches!(or(Pin::Negative, Pin::Negative), Pin::Negative));
+        assert!(matches!(or(Bit::Positive, Bit::Positive), Bit::Positive));
+        assert!(matches!(or(Bit::Positive, Bit::Negative), Bit::Positive));
+        assert!(matches!(or(Bit::Negative, Bit::Positive), Bit::Positive));
+        assert!(matches!(or(Bit::Negative, Bit::Negative), Bit::Negative));
     }
 
     #[test]
     fn xor_works() {
-        assert!(matches!(xor(Pin::Positive, Pin::Positive), Pin::Negative));
-        assert!(matches!(xor(Pin::Positive, Pin::Negative), Pin::Positive));
-        assert!(matches!(xor(Pin::Negative, Pin::Positive), Pin::Positive));
-        assert!(matches!(xor(Pin::Negative, Pin::Negative), Pin::Negative));
+        assert!(matches!(xor(Bit::Positive, Bit::Positive), Bit::Negative));
+        assert!(matches!(xor(Bit::Positive, Bit::Negative), Bit::Positive));
+        assert!(matches!(xor(Bit::Negative, Bit::Positive), Bit::Positive));
+        assert!(matches!(xor(Bit::Negative, Bit::Negative), Bit::Negative));
     }
 
     #[test]
     fn mux_work() {
-        for b in [Pin::Positive, Pin::Negative] {
+        for b in [Bit::Positive, Bit::Negative] {
             assert!(matches!(
-                mux(Pin::Positive, b, Pin::Positive),
-                Pin::Positive,
+                mux(Bit::Positive, b, Bit::Positive),
+                Bit::Positive,
             ));
             assert!(matches!(
-                mux(Pin::Negative, b, Pin::Positive),
-                Pin::Negative,
+                mux(Bit::Negative, b, Bit::Positive),
+                Bit::Negative,
             ));
         }
-        for a in [Pin::Positive, Pin::Negative] {
+        for a in [Bit::Positive, Bit::Negative] {
             assert!(matches!(
-                mux(a, Pin::Positive, Pin::Negative),
-                Pin::Positive,
+                mux(a, Bit::Positive, Bit::Negative),
+                Bit::Positive,
             ));
             assert!(matches!(
-                mux(a, Pin::Negative, Pin::Negative),
-                Pin::Negative,
+                mux(a, Bit::Negative, Bit::Negative),
+                Bit::Negative,
             ));
         }
     }
@@ -93,27 +93,27 @@ mod test {
     #[test]
     fn dmux_work() {
         assert!(matches!(
-            dmux(Pin::Positive, Pin::Positive),
-            (Pin::Positive, Pin::Negative),
+            dmux(Bit::Positive, Bit::Positive),
+            (Bit::Positive, Bit::Negative),
         ));
         assert!(matches!(
-            dmux(Pin::Negative, Pin::Positive),
-            (Pin::Negative, Pin::Negative),
+            dmux(Bit::Negative, Bit::Positive),
+            (Bit::Negative, Bit::Negative),
         ));
         assert!(matches!(
-            dmux(Pin::Positive, Pin::Negative),
-            (Pin::Negative, Pin::Positive),
+            dmux(Bit::Positive, Bit::Negative),
+            (Bit::Negative, Bit::Positive),
         ));
         assert!(matches!(
-            dmux(Pin::Negative, Pin::Negative),
-            (Pin::Negative, Pin::Negative),
+            dmux(Bit::Negative, Bit::Negative),
+            (Bit::Negative, Bit::Negative),
         ));
     }
 
     #[test]
     fn dmux_mux_is_id() {
-        for x in [Pin::Positive, Pin::Negative] {
-            for sel in [Pin::Positive, Pin::Negative] {
+        for x in [Bit::Positive, Bit::Negative] {
+            for sel in [Bit::Positive, Bit::Negative] {
                 let (a, b) = dmux(x, sel);
                 assert_pin_equals!(mux(a, b, sel), x);
             }

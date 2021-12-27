@@ -2,8 +2,8 @@ mod gates;
 mod primitive;
 
 fn main() {
-    let a = primitive::Pin::Negative;
-    let b = primitive::Pin::Positive;
+    let a = primitive::Bit::Negative;
+    let b = primitive::Bit::Positive;
     let _ = a.nand(b);
     println!("Hello, world!");
 }
