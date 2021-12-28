@@ -26,16 +26,16 @@ pub fn dmux(x: Bit, sel: Bit) -> [Bit; 2] {
     [and(x, not(sel)), and(x, sel)]
 }
 
-pub fn dmux4way(x: Bit, sel: &Bus2) -> (Bit, Bit, Bit, Bit) {
+pub fn dmux4way(x: Bit, sel: &Bus2) -> [Bit; 4] {
     let [u, v] = dmux(x, sel.0[0]);
     let [a, b] = dmux(u, sel.0[1]);
     let [c, d] = dmux(v, sel.0[1]);
-    (a, b, c, d)
+    [a, b, c, d]
 }
 
 pub fn dmux8way(x: Bit, sel: &Bus3) -> [Bit; 8] {
     let bus2 = Bus2([sel.0[0], sel.0[1]]);
-    let (s, t, u, v) = dmux4way(x, &bus2);
+    let [s, t, u, v] = dmux4way(x, &bus2);
     let [a, b] = dmux(s, sel.0[2]);
     let [c, d] = dmux(t, sel.0[2]);
     let [e, f] = dmux(u, sel.0[2]);
@@ -142,58 +142,22 @@ mod test {
     #[test]
     fn dmux4way_works() {
         for x in [Bit::Negative, Bit::Positive] {
-            {
-                let y = dmux4way(x, &Bus2([Bit::Negative, Bit::Negative]));
-                assert_bit_equals!(y.0, x);
-                assert_bit_equals!(y.1, Bit::Negative);
-                assert_bit_equals!(y.2, Bit::Negative);
-                assert_bit_equals!(y.3, Bit::Negative);
-            }
-            {
-                let y = dmux4way(x, &Bus2([Bit::Negative, Bit::Positive]));
-                assert_bit_equals!(y.0, Bit::Negative);
-                assert_bit_equals!(y.1, x);
-                assert_bit_equals!(y.2, Bit::Negative);
-                assert_bit_equals!(y.3, Bit::Negative);
-            }
-            {
-                let y = dmux4way(x, &Bus2([Bit::Positive, Bit::Negative]));
-                assert_bit_equals!(y.0, Bit::Negative);
-                assert_bit_equals!(y.1, Bit::Negative);
-                assert_bit_equals!(y.2, x);
-                assert_bit_equals!(y.3, Bit::Negative);
-            }
-            {
-                let y = dmux4way(x, &Bus2([Bit::Positive, Bit::Positive]));
-                assert_bit_equals!(y.0, Bit::Negative);
-                assert_bit_equals!(y.1, Bit::Negative);
-                assert_bit_equals!(y.2, Bit::Negative);
-                assert_bit_equals!(y.3, x);
+            for i in 0..4 {
+                let sel = make_bus2(i);
+                let y = dmux4way(x, &sel);
+                for j in 0..4 {
+                    if i == j {
+                        assert_bit_equals!(y[j], x);
+                    } else {
+                        assert_bit_equals!(y[j], Bit::Negative);
+                    }
+                }
             }
         }
     }
 
     #[test]
     fn dmux8way_works() {
-        let make_bus3 = |i: usize| {
-            Bus3([
-                if (i >> 2) % 2 == 0 {
-                    Bit::Negative
-                } else {
-                    Bit::Positive
-                },
-                if (i >> 1) % 2 == 0 {
-                    Bit::Negative
-                } else {
-                    Bit::Positive
-                },
-                if i % 2 == 0 {
-                    Bit::Negative
-                } else {
-                    Bit::Positive
-                },
-            ])
-        };
         for x in [Bit::Negative, Bit::Positive] {
             for i in 0..8 {
                 let sel = make_bus3(i);
@@ -207,5 +171,40 @@ mod test {
                 }
             }
         }
+    }
+
+    fn make_bus2(i: usize) -> Bus2 {
+        Bus2([
+            if (i >> 1) % 2 == 0 {
+                Bit::Negative
+            } else {
+                Bit::Positive
+            },
+            if i % 2 == 0 {
+                Bit::Negative
+            } else {
+                Bit::Positive
+            },
+        ])
+    }
+
+    fn make_bus3(i: usize) -> Bus3 {
+        Bus3([
+            if (i >> 2) % 2 == 0 {
+                Bit::Negative
+            } else {
+                Bit::Positive
+            },
+            if (i >> 1) % 2 == 0 {
+                Bit::Negative
+            } else {
+                Bit::Positive
+            },
+            if i % 2 == 0 {
+                Bit::Negative
+            } else {
+                Bit::Positive
+            },
+        ])
     }
 }
