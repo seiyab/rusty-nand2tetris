@@ -1,6 +1,19 @@
-use crate::primitive::{Bit, Bus16};
+use crate::primitive::Bit;
 
 use super::bit;
+
+pub struct Bus16(pub [Bit; 16]);
+
+#[macro_export]
+macro_rules! assert_bus16_equals {
+    ($actual:expr, $expected:expr) => {
+        let Bus16(a) = $actual;
+        let Bus16(b) = $expected;
+        for i in 0..16 {
+            assert_bit_equals!(a[i], b[i]);
+        }
+    };
+}
 
 pub fn not(x: &Bus16) -> Bus16 {
     Bus16([
@@ -153,6 +166,12 @@ mod tests {
         Bit::Positive,
         Bit::Positive,
     ]);
+
+    #[test]
+    fn assert_bus16_equals_works() {
+        assert_bus16_equals!(Bus16([Bit::Positive; 16]), Bus16([Bit::Positive; 16]));
+        assert_bus16_equals!(Bus16([Bit::Negative; 16]), Bus16([Bit::Negative; 16]));
+    }
 
     #[test]
     fn not_works() {
