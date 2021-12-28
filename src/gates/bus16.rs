@@ -166,6 +166,19 @@ pub fn mux8way16(
     mux(&s, &t, sel.0[0])
 }
 
+pub fn or16way(x: &Bus16) -> Bit {
+    bit::or(
+        bit::or(
+            bit::or(bit::or(x.0[0], x.0[1]), bit::or(x.0[2], x.0[3])),
+            bit::or(bit::or(x.0[4], x.0[5]), bit::or(x.0[6], x.0[7])),
+        ),
+        bit::or(
+            bit::or(bit::or(x.0[8], x.0[9]), bit::or(x.0[10], x.0[11])),
+            bit::or(bit::or(x.0[12], x.0[13]), bit::or(x.0[14], x.0[15])),
+        ),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -369,5 +382,15 @@ mod tests {
             ),
             &FXT
         );
+    }
+
+    #[test]
+    fn or16way_works() {
+        assert_bit_equals!(or16way(&Bus16([Bit::Negative; 16])), Bit::Negative);
+        for i in 0..15 {
+            let mut bits = [Bit::Negative; 16];
+            bits[i] = Bit::Positive;
+            assert_bit_equals!(or16way(&Bus16(bits)), Bit::Positive);
+        }
     }
 }

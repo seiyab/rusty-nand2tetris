@@ -67,12 +67,42 @@ pub fn inc16(a: &bus16::Bus16) -> bus16::Bus16 {
     )
 }
 
+pub struct AluOut {
+    out: bus16::Bus16,
+    zr: Bit,
+    ng: Bit,
+}
+
+pub struct AluControl {
+    zx: Bit,
+    nx: Bit,
+    zy: Bit,
+    ny: Bit,
+    f: Bit,
+    no: Bit,
+}
+
+pub fn alu(x: &bus16::Bus16, y: &bus16::Bus16, ctrl: AluControl) -> AluOut {
+    let x = bus16::mux(&x, &bus16::Bus16([Bit::Negative; 16]), ctrl.zx);
+    let x = bus16::mux(&x, &bus16::not(&x), ctrl.nx);
+    let y = bus16::mux(&y, &bus16::Bus16([Bit::Negative; 16]), ctrl.zy);
+    let y = bus16::mux(&y, &bus16::not(&y), ctrl.ny);
+
+    let out = bus16::mux(&bus16::and(&x, &y), &add16(&x, &y), ctrl.f);
+    let out = bus16::mux(&out, &bus16::not(&out), ctrl.no);
+
+    let zr = bit::not(bus16::or16way(&out));
+    let ng = out.0[0];
+    AluOut { out, zr, ng }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::assert_bit_equals;
     use crate::assert_bus16_equals;
     use crate::gates::bus16::Bus16;
+    use std::ops::Not;
 
     #[test]
     fn add16_works() {
@@ -146,6 +176,54 @@ mod tests {
                 Bit::Negative,
             ])
         );
+    }
+
+    #[test]
+    fn alu_works() {
+        let fixtures = [0, 1, 2, 10000, -1, -10];
+        for &x in &fixtures {
+            for &y in &fixtures {
+                let x16 = make_bus16(x);
+                let y16 = make_bus16(y);
+
+                let cases: [([i32; 6], i32); 18] = [
+                    ([1, 0, 1, 0, 1, 0], 0),
+                    ([1, 1, 1, 1, 1, 1], 1),
+                    ([1, 1, 1, 0, 1, 0], -1),
+                    ([0, 0, 1, 1, 0, 0], x),
+                    ([1, 1, 0, 0, 0, 0], y),
+                    ([0, 0, 1, 1, 0, 1], x.not()),
+                    ([1, 1, 0, 0, 0, 1], y.not()),
+                    ([0, 0, 1, 1, 1, 1], -x),
+                    ([1, 1, 0, 0, 1, 1], -y),
+                    ([0, 1, 1, 1, 1, 1], x + 1),
+                    ([1, 1, 0, 1, 1, 1], y + 1),
+                    ([0, 0, 1, 1, 1, 0], x - 1),
+                    ([1, 1, 0, 0, 1, 0], y - 1),
+                    ([0, 0, 0, 0, 1, 0], x + y),
+                    ([0, 1, 0, 0, 1, 1], x - y),
+                    ([0, 0, 0, 1, 1, 1], y - x),
+                    ([0, 0, 0, 0, 0, 0], x & y),
+                    ([0, 1, 0, 1, 0, 1], x | y),
+                ];
+                for &([zx, nx, zy, ny, f, no], expected) in cases.iter() {
+                    let b = |i: i32| if i == 1 { Bit::Positive } else { Bit::Negative };
+                    let AluOut { out, .. } = alu(
+                        &x16,
+                        &y16,
+                        AluControl {
+                            zx: b(zx),
+                            nx: b(nx),
+                            zy: b(zy),
+                            ny: b(ny),
+                            f: b(f),
+                            no: b(no),
+                        },
+                    );
+                    assert_bus16_equals!(&out, &make_bus16(expected));
+                }
+            }
+        }
     }
 
     fn make_bus16(i: i32) -> bus16::Bus16 {
