@@ -21,7 +21,7 @@ fn full_adder(a: Bit, b: Bit, c: Bit) -> AdderOut {
     }
 }
 
-fn add16(a: &bus16::Bus16, b: &bus16::Bus16) -> bus16::Bus16 {
+pub fn add16(a: &bus16::Bus16, b: &bus16::Bus16) -> bus16::Bus16 {
     let AdderOut { sum: x15, carry } = half_adder(a.0[15], b.0[15]);
     let AdderOut { sum: x14, carry } = full_adder(a.0[14], b.0[14], carry);
     let AdderOut { sum: x13, carry } = full_adder(a.0[13], b.0[13], carry);
@@ -43,6 +43,30 @@ fn add16(a: &bus16::Bus16, b: &bus16::Bus16) -> bus16::Bus16 {
     ])
 }
 
+pub fn inc16(a: &bus16::Bus16) -> bus16::Bus16 {
+    add16(
+        a,
+        &bus16::Bus16([
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Positive,
+        ]),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,6 +82,19 @@ mod tests {
                 let x16 = make_bus16(x);
                 let y16 = make_bus16(y);
                 let z16 = make_bus16(x + y);
+                assert_bus16_equals!(add16(&x16, &y16), &z16);
+            }
+        }
+    }
+
+    #[test]
+    fn inc16_works() {
+        let fixtures = [0, 1, 2, 3, 100, 1000, 10000, -1, -10];
+        for &x in &fixtures {
+            for &y in &fixtures {
+                let x16 = make_bus16(x);
+                let y16 = make_bus16(1);
+                let z16 = make_bus16(x + 1);
                 assert_bus16_equals!(add16(&x16, &y16), &z16);
             }
         }
