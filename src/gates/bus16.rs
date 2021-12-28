@@ -1,4 +1,5 @@
-use crate::gates::Bus2;
+use crate::gates::bus2::Bus2;
+use crate::gates::bus3::Bus3;
 use crate::primitive::Bit;
 
 use super::bit;
@@ -148,6 +149,23 @@ pub fn mux4way16(a: &Bus16, b: &Bus16, c: &Bus16, d: &Bus16, sel: &Bus2) -> Bus1
     mux(&s, &t, sel.0[0])
 }
 
+pub fn mux8way16(
+    a: &Bus16,
+    b: &Bus16,
+    c: &Bus16,
+    d: &Bus16,
+    e: &Bus16,
+    f: &Bus16,
+    g: &Bus16,
+    h: &Bus16,
+    sel: &Bus3,
+) -> Bus16 {
+    let bus2 = Bus2([sel.0[1], sel.0[2]]);
+    let s = mux4way16(a, b, c, d, &bus2);
+    let t = mux4way16(e, f, g, h, &bus2);
+    mux(&s, &t, sel.0[0])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -283,6 +301,73 @@ mod tests {
         assert_bus16_equals!(
             mux4way16(&FXT, &h, &p, &n, &Bus2([Bit::Positive, Bit::Positive])),
             &n
+        );
+    }
+
+    #[test]
+    fn mux8way16_works() {
+        let h = Bus16([
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Negative,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+            Bit::Positive,
+        ]);
+        let p = Bus16([Bit::Positive; 16]);
+        let n = Bus16([Bit::Negative; 16]);
+
+        assert_bus16_equals!(
+            mux8way16(
+                &FXT,
+                &h,
+                &p,
+                &n,
+                &n,
+                &n,
+                &n,
+                &n,
+                &Bus3([Bit::Negative, Bit::Negative, Bit::Negative])
+            ),
+            &FXT
+        );
+        assert_bus16_equals!(
+            mux8way16(
+                &FXT,
+                &n,
+                &p,
+                &n,
+                &n,
+                &h,
+                &n,
+                &n,
+                &Bus3([Bit::Positive, Bit::Negative, Bit::Positive])
+            ),
+            &h
+        );
+        assert_bus16_equals!(
+            mux8way16(
+                &n,
+                &h,
+                &FXT,
+                &n,
+                &n,
+                &n,
+                &n,
+                &n,
+                &Bus3([Bit::Negative, Bit::Positive, Bit::Negative])
+            ),
+            &FXT
         );
     }
 }
