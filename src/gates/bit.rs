@@ -1,3 +1,5 @@
+use crate::gates::bus2::Bus2;
+use crate::gates::bus3::Bus3;
 use crate::primitive::Bit;
 
 pub fn not(x: Bit) -> Bit {
@@ -22,6 +24,13 @@ pub fn mux(x: Bit, y: Bit, sel: Bit) -> Bit {
 
 pub fn dmux(x: Bit, sel: Bit) -> (Bit, Bit) {
     (and(x, not(sel)), and(x, sel))
+}
+
+pub fn dmux4way(x: Bit, sel: &Bus2) -> (Bit, Bit, Bit, Bit) {
+    let (u, v) = dmux(x, sel.0[0]);
+    let (a, b) = dmux(u, sel.0[1]);
+    let (c, d) = dmux(v, sel.0[1]);
+    (a, b, c, d)
 }
 
 #[cfg(test)]
@@ -116,6 +125,40 @@ mod test {
             for sel in [Bit::Positive, Bit::Negative] {
                 let (a, b) = dmux(x, sel);
                 assert_bit_equals!(mux(a, b, sel), x);
+            }
+        }
+    }
+
+    #[test]
+    fn dmux4way_works() {
+        for x in [Bit::Negative, Bit::Positive] {
+            {
+                let y = dmux4way(x, &Bus2([Bit::Negative, Bit::Negative]));
+                assert_bit_equals!(y.0, x);
+                assert_bit_equals!(y.1, Bit::Negative);
+                assert_bit_equals!(y.2, Bit::Negative);
+                assert_bit_equals!(y.3, Bit::Negative);
+            }
+            {
+                let y = dmux4way(x, &Bus2([Bit::Negative, Bit::Positive]));
+                assert_bit_equals!(y.0, Bit::Negative);
+                assert_bit_equals!(y.1, x);
+                assert_bit_equals!(y.2, Bit::Negative);
+                assert_bit_equals!(y.3, Bit::Negative);
+            }
+            {
+                let y = dmux4way(x, &Bus2([Bit::Positive, Bit::Negative]));
+                assert_bit_equals!(y.0, Bit::Negative);
+                assert_bit_equals!(y.1, Bit::Negative);
+                assert_bit_equals!(y.2, x);
+                assert_bit_equals!(y.3, Bit::Negative);
+            }
+            {
+                let y = dmux4way(x, &Bus2([Bit::Positive, Bit::Positive]));
+                assert_bit_equals!(y.0, Bit::Negative);
+                assert_bit_equals!(y.1, Bit::Negative);
+                assert_bit_equals!(y.2, Bit::Negative);
+                assert_bit_equals!(y.3, x);
             }
         }
     }
