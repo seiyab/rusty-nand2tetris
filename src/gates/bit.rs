@@ -17,11 +17,11 @@ pub fn xor(x: Bit, y: Bit) -> Bit {
 }
 
 pub fn mux(x: Bit, y: Bit, sel: Bit) -> Bit {
-    or(and(sel, x), and(not(sel), y))
+    or(and(not(sel), x), and(sel, y))
 }
 
 pub fn dmux(x: Bit, sel: Bit) -> (Bit, Bit) {
-    (and(x, sel), and(x, not(sel)))
+    (and(x, not(sel)), and(x, sel))
 }
 
 #[cfg(test)]
@@ -70,21 +70,21 @@ mod test {
     fn mux_work() {
         for b in [Bit::Positive, Bit::Negative] {
             assert!(matches!(
-                mux(Bit::Positive, b, Bit::Positive),
+                mux(Bit::Positive, b, Bit::Negative),
                 Bit::Positive,
             ));
             assert!(matches!(
-                mux(Bit::Negative, b, Bit::Positive),
+                mux(Bit::Negative, b, Bit::Negative),
                 Bit::Negative,
             ));
         }
         for a in [Bit::Positive, Bit::Negative] {
             assert!(matches!(
-                mux(a, Bit::Positive, Bit::Negative),
+                mux(a, Bit::Positive, Bit::Positive),
                 Bit::Positive,
             ));
             assert!(matches!(
-                mux(a, Bit::Negative, Bit::Negative),
+                mux(a, Bit::Negative, Bit::Positive),
                 Bit::Negative,
             ));
         }
@@ -94,7 +94,7 @@ mod test {
     fn dmux_work() {
         assert!(matches!(
             dmux(Bit::Positive, Bit::Positive),
-            (Bit::Positive, Bit::Negative),
+            (Bit::Negative, Bit::Positive),
         ));
         assert!(matches!(
             dmux(Bit::Negative, Bit::Positive),
@@ -102,7 +102,7 @@ mod test {
         ));
         assert!(matches!(
             dmux(Bit::Positive, Bit::Negative),
-            (Bit::Negative, Bit::Positive),
+            (Bit::Positive, Bit::Negative),
         ));
         assert!(matches!(
             dmux(Bit::Negative, Bit::Negative),
