@@ -22,24 +22,24 @@ pub fn mux(x: Bit, y: Bit, sel: Bit) -> Bit {
     or(and(not(sel), x), and(sel, y))
 }
 
-pub fn dmux(x: Bit, sel: Bit) -> (Bit, Bit) {
-    (and(x, not(sel)), and(x, sel))
+pub fn dmux(x: Bit, sel: Bit) -> [Bit; 2] {
+    [and(x, not(sel)), and(x, sel)]
 }
 
 pub fn dmux4way(x: Bit, sel: &Bus2) -> (Bit, Bit, Bit, Bit) {
-    let (u, v) = dmux(x, sel.0[0]);
-    let (a, b) = dmux(u, sel.0[1]);
-    let (c, d) = dmux(v, sel.0[1]);
+    let [u, v] = dmux(x, sel.0[0]);
+    let [a, b] = dmux(u, sel.0[1]);
+    let [c, d] = dmux(v, sel.0[1]);
     (a, b, c, d)
 }
 
 pub fn dmux8way(x: Bit, sel: &Bus3) -> [Bit; 8] {
     let bus2 = Bus2([sel.0[0], sel.0[1]]);
     let (s, t, u, v) = dmux4way(x, &bus2);
-    let (a, b) = dmux(s, sel.0[2]);
-    let (c, d) = dmux(t, sel.0[2]);
-    let (e, f) = dmux(u, sel.0[2]);
-    let (g, h) = dmux(v, sel.0[2]);
+    let [a, b] = dmux(s, sel.0[2]);
+    let [c, d] = dmux(t, sel.0[2]);
+    let [e, f] = dmux(u, sel.0[2]);
+    let [g, h] = dmux(v, sel.0[2]);
     [a, b, c, d, e, f, g, h]
 }
 
@@ -113,19 +113,19 @@ mod test {
     fn dmux_work() {
         assert!(matches!(
             dmux(Bit::Positive, Bit::Positive),
-            (Bit::Negative, Bit::Positive),
+            [Bit::Negative, Bit::Positive],
         ));
         assert!(matches!(
             dmux(Bit::Negative, Bit::Positive),
-            (Bit::Negative, Bit::Negative),
+            [Bit::Negative, Bit::Negative],
         ));
         assert!(matches!(
             dmux(Bit::Positive, Bit::Negative),
-            (Bit::Positive, Bit::Negative),
+            [Bit::Positive, Bit::Negative],
         ));
         assert!(matches!(
             dmux(Bit::Negative, Bit::Negative),
-            (Bit::Negative, Bit::Negative),
+            [Bit::Negative, Bit::Negative],
         ));
     }
 
@@ -133,7 +133,7 @@ mod test {
     fn dmux_mux_is_id() {
         for x in [Bit::Positive, Bit::Negative] {
             for sel in [Bit::Positive, Bit::Negative] {
-                let (a, b) = dmux(x, sel);
+                let [a, b] = dmux(x, sel);
                 assert_bit_equals!(mux(a, b, sel), x);
             }
         }
