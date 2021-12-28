@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Bit {
     Positive,
     Negative,
@@ -28,6 +28,23 @@ macro_rules! assert_bit_equals {
             Bit::Negative => false,
         };
         assert!(a == e, stringify!(($actual, $expected)));
+    };
+    ($actual:expr, $expected:expr, $arg:expr) => {
+        let a = match $actual {
+            Bit::Positive => true,
+            Bit::Negative => false,
+        };
+        let e = match $expected {
+            Bit::Positive => true,
+            Bit::Negative => false,
+        };
+        assert!(
+            a == e,
+            "bit {} is different, {:?} != {:?}",
+            $arg,
+            $actual,
+            $expected
+        );
     };
 }
 

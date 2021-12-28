@@ -12,7 +12,7 @@ macro_rules! assert_bus16_equals {
         let Bus16(a) = $actual;
         let Bus16(b) = $expected;
         for i in 0..16 {
-            assert_bit_equals!(a[i], b[i]);
+            assert_bit_equals!(a[i], b[i], i);
         }
     };
 }
