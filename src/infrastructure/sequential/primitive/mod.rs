@@ -1,26 +1,11 @@
 use crate::infrastructure::sequential::FuncSC;
-use crate::infrastructure::sequential::SequentialCircuit;
 use crate::primitive::Bit;
 
-pub struct Dff(FuncSC<'static, Bit, Bit, Bit, fn(&Bit, Bit) -> (Bit, Bit)>);
+pub type Dff = FuncSC<'static, Bit, Bit, Bit, fn(&Bit, Bit) -> (Bit, Bit)>;
 
 impl Dff {
     fn new() -> Self {
-        Self(FuncSC::of(
-            Bit::Negative,
-            &(dff_fn as fn(&Bit, Bit) -> (Bit, Bit)),
-        ))
-    }
-}
-
-impl SequentialCircuit for Dff {
-    type Input = Bit;
-    type Output = Bit;
-
-    fn tick(&self, i: Self::Input) -> (Self::Output, Self) {
-        let Self(f) = self;
-        let (o, nx) = f.tick(i);
-        (o, Self(nx))
+        FuncSC::of(Bit::Negative, &(dff_fn as fn(&Bit, Bit) -> (Bit, Bit)))
     }
 }
 
