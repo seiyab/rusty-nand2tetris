@@ -11,3 +11,6 @@ pub mod primitive;
 
 mod feedback_sc;
 pub use self::feedback_sc::*;
+
+mod feedforward_sc;
+pub use self::feedforward_sc::*;

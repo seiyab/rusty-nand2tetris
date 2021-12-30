@@ -4,6 +4,7 @@ use crate::primitive::Bit;
 
 use super::bit;
 
+#[derive(Clone)]
 pub struct Bus16(pub [Bit; 16]);
 
 #[macro_export]

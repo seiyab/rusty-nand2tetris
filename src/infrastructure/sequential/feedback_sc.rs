@@ -4,13 +4,6 @@ use super::primitive::Dff;
 use super::sequential_circuit::SequentialCircuit;
 use crate::primitive::Bit;
 
-/*
-pub struct FeedbackSC<I, O, Pre, Post>
-where
-    Pre: Fn(Input, &Output) -> Bit,
-    Post: Fn()
-*/
-
 pub struct FeedbackSC<T: FeedbackSCDef> {
     dff: Dff,
     p: PhantomData<T>,

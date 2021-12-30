@@ -2,6 +2,12 @@ use super::sequential_circuit::SequentialCircuit;
 
 pub struct TupleSC2<A: SequentialCircuit, B: SequentialCircuit>(A, B);
 
+impl<A: SequentialCircuit, B: SequentialCircuit> TupleSC2<A, B> {
+    pub fn new(a: A, b: B) -> Self {
+        Self(a, b)
+    }
+}
+
 impl<A: SequentialCircuit, B: SequentialCircuit> SequentialCircuit for TupleSC2<A, B> {
     type Input = (A::Input, B::Input);
     type Output = (A::Output, B::Output);
