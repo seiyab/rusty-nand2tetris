@@ -1,16 +1,16 @@
 use crate::infrastructure::sequential::FuncSC;
 use crate::primitive::Bit;
 
-pub type Dff = FuncSC<'static, Bit, Bit, Bit, fn(&Bit, Bit) -> (Bit, Bit)>;
+pub type Dff = FuncSC<'static, Bit, Bit, Bit, fn(&Bit, &Bit) -> (Bit, Bit)>;
 
 impl Dff {
-    fn new() -> Self {
-        FuncSC::of(Bit::Negative, &(dff_fn as fn(&Bit, Bit) -> (Bit, Bit)))
+    pub fn new() -> Self {
+        FuncSC::of(Bit::Negative, &(dff_fn as fn(&Bit, &Bit) -> (Bit, Bit)))
     }
 }
 
-fn dff_fn(s: &Bit, i: Bit) -> (Bit, Bit) {
-    (*s, i)
+fn dff_fn(s: &Bit, i: &Bit) -> (Bit, Bit) {
+    (*s, *i)
 }
 
 #[cfg(test)]
@@ -22,17 +22,17 @@ mod tests {
     #[test]
     fn dff_works() {
         let dff = Dff::new();
-        let (o, dff) = dff.tick(Bit::Positive);
+        let (o, dff) = dff.tick(&Bit::Positive);
         assert_bit_equals!(o, Bit::Negative);
-        let (o, dff) = dff.tick(Bit::Negative);
+        let (o, dff) = dff.tick(&Bit::Negative);
         assert_bit_equals!(o, Bit::Positive);
-        let (o, dff) = dff.tick(Bit::Negative);
+        let (o, dff) = dff.tick(&Bit::Negative);
         assert_bit_equals!(o, Bit::Negative);
-        let (o, dff) = dff.tick(Bit::Negative);
+        let (o, dff) = dff.tick(&Bit::Negative);
         assert_bit_equals!(o, Bit::Negative);
-        let (o, dff) = dff.tick(Bit::Positive);
+        let (o, dff) = dff.tick(&Bit::Positive);
         assert_bit_equals!(o, Bit::Negative);
-        let (o, _) = dff.tick(Bit::Positive);
+        let (o, _) = dff.tick(&Bit::Positive);
         assert_bit_equals!(o, Bit::Positive);
     }
 }

@@ -1,6 +1,7 @@
 mod gates;
 mod infrastructure;
 mod primitive;
+mod sequential;
 
 fn main() {
     let a = primitive::Bit::Negative;

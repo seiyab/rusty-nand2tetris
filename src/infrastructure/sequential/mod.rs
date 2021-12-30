@@ -7,4 +7,7 @@ pub use self::func_sc::*;
 mod tuple_sc;
 pub use self::tuple_sc::*;
 
-mod primitive;
+pub mod primitive;
+
+mod feedback_sc;
+pub use self::feedback_sc::*;

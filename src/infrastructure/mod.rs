@@ -1,1 +1,1 @@
-mod sequential;
+pub mod sequential;

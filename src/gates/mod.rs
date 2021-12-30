@@ -1,11 +1,11 @@
-mod bit;
+pub mod bit;
 
-mod bus2;
+pub mod bus2;
 
-mod bus3;
+pub mod bus3;
 
-mod bus8;
+pub mod bus8;
 
-mod bus16;
+pub mod bus16;
 
-mod adder;
+pub mod adder;
