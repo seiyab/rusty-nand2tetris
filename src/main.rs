@@ -1,6 +1,7 @@
 #![feature(array_zip)]
 
 mod gates;
+mod general;
 mod infrastructure;
 mod primitive;
 mod sequential;

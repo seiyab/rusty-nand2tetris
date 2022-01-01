@@ -101,6 +101,7 @@ mod tests {
     use super::*;
     use crate::assert_bit_equals;
     use crate::assert_bus16_equals;
+    use crate::gates::bus16::testing::*;
     use crate::gates::bus16::Bus16;
     use std::ops::Not;
 
@@ -223,35 +224,6 @@ mod tests {
                     assert_bus16_equals!(&out, &make_bus16(expected));
                 }
             }
-        }
-    }
-
-    fn make_bus16(i: i32) -> bus16::Bus16 {
-        bus16::Bus16([
-            make_bit(i & (1 << 15) != 0),
-            make_bit(i & (1 << 14) != 0),
-            make_bit(i & (1 << 13) != 0),
-            make_bit(i & (1 << 12) != 0),
-            make_bit(i & (1 << 11) != 0),
-            make_bit(i & (1 << 10) != 0),
-            make_bit(i & (1 << 9) != 0),
-            make_bit(i & (1 << 8) != 0),
-            make_bit(i & (1 << 7) != 0),
-            make_bit(i & (1 << 6) != 0),
-            make_bit(i & (1 << 5) != 0),
-            make_bit(i & (1 << 4) != 0),
-            make_bit(i & (1 << 3) != 0),
-            make_bit(i & (1 << 2) != 0),
-            make_bit(i & (1 << 1) != 0),
-            make_bit(i & (1 << 0) != 0),
-        ])
-    }
-
-    fn make_bit(b: bool) -> Bit {
-        if b {
-            Bit::Positive
-        } else {
-            Bit::Negative
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::primitive::Bit;
 
 use super::bit;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Bus16(pub [Bit; 16]);
 
 #[macro_export]
@@ -13,7 +13,14 @@ macro_rules! assert_bus16_equals {
         let Bus16(a) = $actual;
         let Bus16(b) = $expected;
         for i in 0..16 {
-            assert_bit_equals!(a[i], b[i], i);
+            assert_bit_equals!(a[i], b[i], format!("bit {} is different", i));
+        }
+    };
+    ($actual:expr, $expected:expr, $arg:expr) => {
+        let Bus16(a) = $actual;
+        let Bus16(b) = $expected;
+        for i in 0..16 {
+            assert_bit_equals!(a[i], b[i], format!("{}, bit {} is different", $arg, i));
         }
     };
 }
@@ -161,10 +168,10 @@ pub fn mux8way16(
     h: &Bus16,
     sel: &Bus3,
 ) -> Bus16 {
-    let bus2 = Bus2([sel.0[1], sel.0[2]]);
+    let bus2 = Bus2([sel[1], sel[2]]);
     let s = mux4way16(a, b, c, d, &bus2);
     let t = mux4way16(e, f, g, h, &bus2);
-    mux(&s, &t, sel.0[0])
+    mux(&s, &t, sel[0])
 }
 
 pub fn or16way(x: &Bus16) -> Bit {
@@ -351,7 +358,7 @@ mod tests {
                 &n,
                 &n,
                 &n,
-                &Bus3([Bit::Negative, Bit::Negative, Bit::Negative])
+                &[Bit::Negative, Bit::Negative, Bit::Negative]
             ),
             &FXT
         );
@@ -365,7 +372,7 @@ mod tests {
                 &h,
                 &n,
                 &n,
-                &Bus3([Bit::Positive, Bit::Negative, Bit::Positive])
+                &[Bit::Positive, Bit::Negative, Bit::Positive]
             ),
             &h
         );
@@ -379,7 +386,7 @@ mod tests {
                 &n,
                 &n,
                 &n,
-                &Bus3([Bit::Negative, Bit::Positive, Bit::Negative])
+                &[Bit::Negative, Bit::Positive, Bit::Negative]
             ),
             &FXT
         );
@@ -392,6 +399,32 @@ mod tests {
             let mut bits = [Bit::Negative; 16];
             bits[i] = Bit::Positive;
             assert_bit_equals!(or16way(&Bus16(bits)), Bit::Positive);
+        }
+    }
+}
+
+pub mod testing {
+    use super::*;
+    use crate::gates::bit::testing::make_bit;
+
+    pub fn make_bus16(i: i32) -> Bus16 {
+        let mut b16 = [Bit::Negative; 16];
+        for b in 0..16 {
+            b16[b] = make_bit(i & (1 << (15 - b)) != 0);
+        }
+        Bus16(b16)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use crate::assert_bit_equals;
+        use crate::assert_bus16_equals;
+
+        #[test]
+        fn make_bus16_works() {
+            let a = make_bus16(0);
+            assert_bus16_equals!(a, Bus16([Bit::Negative; 16]), format!("{:?}", a));
         }
     }
 }

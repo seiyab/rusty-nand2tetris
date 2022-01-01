@@ -2,13 +2,13 @@ use crate::primitive::Bit;
 
 use super::bit;
 
-pub struct Bus8(pub [Bit; 8]);
+pub type Bus8 = [Bit; 8];
 
 #[macro_export]
 macro_rules! assert_bus8_equals {
     ($actual:expr, $expected:expr) => {
-        let Bus8(a) = $actual;
-        let Bus8(b) = $expected;
+        let a = $actual;
+        let b = $expected;
         for i in 0..8 {
             assert_bit_equals!(a[i], b[i]);
         }
@@ -17,8 +17,8 @@ macro_rules! assert_bus8_equals {
 
 pub fn or8way(x: Bus8) -> Bit {
     bit::or(
-        bit::or(bit::or(x.0[0], x.0[1]), bit::or(x.0[2], x.0[3])),
-        bit::or(bit::or(x.0[4], x.0[5]), bit::or(x.0[6], x.0[7])),
+        bit::or(bit::or(x[0], x[1]), bit::or(x[2], x[3])),
+        bit::or(bit::or(x[4], x[5]), bit::or(x[6], x[7])),
     )
 }
 
@@ -31,16 +31,16 @@ mod tests {
 
     #[test]
     fn assert_bus8_equals_works() {
-        assert_bus8_equals!(Bus8([Bit::Positive; 8]), Bus8([Bit::Positive; 8]));
-        assert_bus8_equals!(Bus8([Bit::Negative; 8]), Bus8([Bit::Negative; 8]));
+        assert_bus8_equals!([Bit::Positive; 8], [Bit::Positive; 8]);
+        assert_bus8_equals!([Bit::Negative; 8], [Bit::Negative; 8]);
     }
 
     #[test]
     fn or8way_works() {
-        assert_bit_equals!(or8way(Bus8([Bit::Positive; 8])), Bit::Positive);
-        assert_bit_equals!(or8way(Bus8([Bit::Negative; 8])), Bit::Negative);
+        assert_bit_equals!(or8way([Bit::Positive; 8]), Bit::Positive);
+        assert_bit_equals!(or8way([Bit::Negative; 8]), Bit::Negative);
         assert_bit_equals!(
-            or8way(Bus8([
+            or8way([
                 Bit::Positive,
                 Bit::Negative,
                 Bit::Negative,
@@ -49,11 +49,11 @@ mod tests {
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Negative,
-            ])),
+            ]),
             Bit::Positive
         );
         assert_bit_equals!(
-            or8way(Bus8([
+            or8way([
                 Bit::Negative,
                 Bit::Positive,
                 Bit::Negative,
@@ -62,11 +62,11 @@ mod tests {
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Negative,
-            ])),
+            ]),
             Bit::Positive
         );
         assert_bit_equals!(
-            or8way(Bus8([
+            or8way([
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Negative,
@@ -75,7 +75,7 @@ mod tests {
                 Bit::Positive,
                 Bit::Negative,
                 Bit::Negative,
-            ])),
+            ]),
             Bit::Positive
         );
     }

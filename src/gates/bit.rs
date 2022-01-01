@@ -34,12 +34,12 @@ pub fn dmux4way(x: Bit, sel: &Bus2) -> [Bit; 4] {
 }
 
 pub fn dmux8way(x: Bit, sel: &Bus3) -> [Bit; 8] {
-    let bus2 = Bus2([sel.0[0], sel.0[1]]);
+    let bus2 = Bus2([sel[0], sel[1]]);
     let [s, t, u, v] = dmux4way(x, &bus2);
-    let [a, b] = dmux(s, sel.0[2]);
-    let [c, d] = dmux(t, sel.0[2]);
-    let [e, f] = dmux(u, sel.0[2]);
-    let [g, h] = dmux(v, sel.0[2]);
+    let [a, b] = dmux(s, sel[2]);
+    let [c, d] = dmux(t, sel[2]);
+    let [e, f] = dmux(u, sel[2]);
+    let [g, h] = dmux(v, sel[2]);
     [a, b, c, d, e, f, g, h]
 }
 
@@ -47,6 +47,7 @@ pub fn dmux8way(x: Bit, sel: &Bus3) -> [Bit; 8] {
 mod test {
     use super::*;
     use crate::assert_bit_equals;
+    use crate::gates::bus3::testing::make_bus3;
 
     #[test]
     fn not_works() {
@@ -160,7 +161,7 @@ mod test {
     fn dmux8way_works() {
         for x in [Bit::Negative, Bit::Positive] {
             for i in 0..8 {
-                let sel = make_bus3(i);
+                let sel = make_bus3(i as i32);
                 let y = dmux8way(x, &sel);
                 for j in 0..8 {
                     if i == j {
@@ -187,24 +188,16 @@ mod test {
             },
         ])
     }
+}
 
-    fn make_bus3(i: usize) -> Bus3 {
-        Bus3([
-            if (i >> 2) % 2 == 0 {
-                Bit::Negative
-            } else {
-                Bit::Positive
-            },
-            if (i >> 1) % 2 == 0 {
-                Bit::Negative
-            } else {
-                Bit::Positive
-            },
-            if i % 2 == 0 {
-                Bit::Negative
-            } else {
-                Bit::Positive
-            },
-        ])
+pub mod testing {
+    use super::*;
+
+    pub fn make_bit(b: bool) -> Bit {
+        if b {
+            Bit::Positive
+        } else {
+            Bit::Negative
+        }
     }
 }

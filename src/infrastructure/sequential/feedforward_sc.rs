@@ -8,17 +8,22 @@ pub struct FeedforwardSC<S: SequentialCircuit, T: FeedforwardSCDef<S>> {
 }
 
 impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> FeedforwardSC<S, T> {
-    pub fn new(sc: S) -> Self {
-        Self { sc, p: PhantomData }
+    pub fn new() -> Self {
+        Self {
+            sc: T::new(),
+            p: PhantomData,
+        }
     }
 }
 
 pub trait FeedforwardSCDef<S: SequentialCircuit> {
     type Input;
     type Output;
+    type Jump;
 
-    fn pre(i: &Self::Input) -> S::Input;
-    fn post(b: &S::Output) -> Self::Output;
+    fn new() -> S;
+    fn pre(i: &Self::Input) -> (S::Input, Self::Jump);
+    fn post(b: &S::Output, j: &Self::Jump) -> Self::Output;
 }
 
 impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> SequentialCircuit for FeedforwardSC<S, T> {
@@ -26,9 +31,9 @@ impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> SequentialCircuit for Feedfor
     type Output = T::Output;
 
     fn tick(&self, input: &Self::Input) -> (Self::Output, Self) {
-        let sc_in = T::pre(input);
+        let (sc_in, jump) = T::pre(input);
         let (sc_out, sc) = self.sc.tick(&sc_in);
-        let out = T::post(&sc_out);
+        let out = T::post(&sc_out, &jump);
         (out, Self { sc, p: PhantomData })
     }
 }

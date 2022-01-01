@@ -38,13 +38,7 @@ macro_rules! assert_bit_equals {
             Bit::Positive => true,
             Bit::Negative => false,
         };
-        assert!(
-            a == e,
-            "bit {} is different, {:?} != {:?}",
-            $arg,
-            $actual,
-            $expected
-        );
+        assert!(a == e, "{}, {:?} != {:?}", $arg, $actual, $expected);
     };
 }
 
