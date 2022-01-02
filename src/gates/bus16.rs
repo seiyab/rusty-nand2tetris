@@ -88,6 +88,10 @@ pub fn or(x: &Bus16, y: &Bus16) -> Bus16 {
     ])
 }
 
+pub fn broadcast(x: Bit) -> Bus16 {
+    Bus16([x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x])
+}
+
 pub fn mux(x: &Bus16, y: &Bus16, sel: Bit) -> Bus16 {
     Bus16([
         bit::mux(x.0[0], y.0[0], sel),
@@ -109,52 +113,10 @@ pub fn mux(x: &Bus16, y: &Bus16, sel: Bit) -> Bus16 {
     ])
 }
 
-pub fn dmux(x: &Bus16, sel: Bit) -> [Bus16; 2] {
-    let not_sel = bit::not(sel);
-    [
-        Bus16([
-            bit::and(x.0[0], not_sel),
-            bit::and(x.0[1], not_sel),
-            bit::and(x.0[2], not_sel),
-            bit::and(x.0[3], not_sel),
-            bit::and(x.0[4], not_sel),
-            bit::and(x.0[5], not_sel),
-            bit::and(x.0[6], not_sel),
-            bit::and(x.0[7], not_sel),
-            bit::and(x.0[8], not_sel),
-            bit::and(x.0[9], not_sel),
-            bit::and(x.0[10], not_sel),
-            bit::and(x.0[11], not_sel),
-            bit::and(x.0[12], not_sel),
-            bit::and(x.0[13], not_sel),
-            bit::and(x.0[14], not_sel),
-            bit::and(x.0[15], not_sel),
-        ]),
-        Bus16([
-            bit::and(x.0[0], sel),
-            bit::and(x.0[1], sel),
-            bit::and(x.0[2], sel),
-            bit::and(x.0[3], sel),
-            bit::and(x.0[4], sel),
-            bit::and(x.0[5], sel),
-            bit::and(x.0[6], sel),
-            bit::and(x.0[7], sel),
-            bit::and(x.0[8], sel),
-            bit::and(x.0[9], sel),
-            bit::and(x.0[10], sel),
-            bit::and(x.0[11], sel),
-            bit::and(x.0[12], sel),
-            bit::and(x.0[13], sel),
-            bit::and(x.0[14], sel),
-            bit::and(x.0[15], sel),
-        ]),
-    ]
-}
-
 pub fn mux4way16(a: &Bus16, b: &Bus16, c: &Bus16, d: &Bus16, sel: &Bus2) -> Bus16 {
-    let s = mux(a, b, sel.0[1]);
-    let t = mux(c, d, sel.0[1]);
-    mux(&s, &t, sel.0[0])
+    let s = mux(a, b, sel[1]);
+    let t = mux(c, d, sel[1]);
+    mux(&s, &t, sel[0])
 }
 
 pub fn mux8way16(
@@ -168,10 +130,33 @@ pub fn mux8way16(
     h: &Bus16,
     sel: &Bus3,
 ) -> Bus16 {
-    let bus2 = Bus2([sel[1], sel[2]]);
+    let bus2 = [sel[1], sel[2]];
     let s = mux4way16(a, b, c, d, &bus2);
     let t = mux4way16(e, f, g, h, &bus2);
     mux(&s, &t, sel[0])
+}
+
+pub fn dmux(x: &Bus16, sel: Bit) -> [Bus16; 2] {
+    let not_sel = bit::not(sel);
+    [and(x, &broadcast(not_sel)), and(x, &broadcast(sel))]
+}
+
+pub fn dmux4way16(x: &Bus16, sel: &Bus2) -> [Bus16; 4] {
+    let [s0, s1] = sel;
+    let [u, v] = dmux(x, *s0);
+    let [a, b] = dmux(&u, *s1);
+    let [c, d] = dmux(&v, *s1);
+    [a, b, c, d]
+}
+
+pub fn dmux8way16(x: &Bus16, sel: &Bus3) -> [Bus16; 8] {
+    let b2 = [sel[0], sel[1]];
+    let [s, t, u, v] = dmux4way16(x, &b2);
+    let [a, b] = dmux(&s, sel[2]);
+    let [c, d] = dmux(&t, sel[2]);
+    let [e, f] = dmux(&u, sel[2]);
+    let [g, h] = dmux(&v, sel[2]);
+    [a, b, c, d, e, f, g, h]
 }
 
 pub fn or16way(x: &Bus16) -> Bit {
@@ -189,9 +174,11 @@ pub fn or16way(x: &Bus16) -> Bit {
 
 #[cfg(test)]
 mod tests {
+    use super::testing::make_bus16;
     use super::*;
     use crate::assert_bit_equals;
     use crate::assert_bus16_equals;
+    use crate::gates::bus3::testing::make_bus3;
     use crate::primitive::Bit;
 
     const FXT: Bus16 = Bus16([
@@ -308,19 +295,19 @@ mod tests {
         let n = Bus16([Bit::Negative; 16]);
 
         assert_bus16_equals!(
-            mux4way16(&FXT, &h, &p, &n, &Bus2([Bit::Negative, Bit::Negative])),
+            mux4way16(&FXT, &h, &p, &n, &[Bit::Negative, Bit::Negative]),
             &FXT
         );
         assert_bus16_equals!(
-            mux4way16(&FXT, &h, &p, &n, &Bus2([Bit::Negative, Bit::Positive])),
+            mux4way16(&FXT, &h, &p, &n, &[Bit::Negative, Bit::Positive]),
             &h
         );
         assert_bus16_equals!(
-            mux4way16(&FXT, &h, &p, &n, &Bus2([Bit::Positive, Bit::Negative])),
+            mux4way16(&FXT, &h, &p, &n, &[Bit::Positive, Bit::Negative]),
             &p
         );
         assert_bus16_equals!(
-            mux4way16(&FXT, &h, &p, &n, &Bus2([Bit::Positive, Bit::Positive])),
+            mux4way16(&FXT, &h, &p, &n, &[Bit::Positive, Bit::Positive]),
             &n
         );
     }
@@ -390,6 +377,22 @@ mod tests {
             ),
             &FXT
         );
+    }
+
+    #[test]
+    fn dmux8way16_works() {
+        let x = make_bus16(1010);
+        for i in 0..8 {
+            let sel = make_bus3(i as i32);
+            let out = dmux8way16(&x, &sel);
+            for j in 0..8 {
+                if i == j {
+                    assert_bus16_equals!(&out[j], &x);
+                } else {
+                    assert_bus16_equals!(&out[j], &make_bus16(0));
+                }
+            }
+        }
     }
 
     #[test]

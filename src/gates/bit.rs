@@ -27,14 +27,14 @@ pub fn dmux(x: Bit, sel: Bit) -> [Bit; 2] {
 }
 
 pub fn dmux4way(x: Bit, sel: &Bus2) -> [Bit; 4] {
-    let [u, v] = dmux(x, sel.0[0]);
-    let [a, b] = dmux(u, sel.0[1]);
-    let [c, d] = dmux(v, sel.0[1]);
+    let [u, v] = dmux(x, sel[0]);
+    let [a, b] = dmux(u, sel[1]);
+    let [c, d] = dmux(v, sel[1]);
     [a, b, c, d]
 }
 
 pub fn dmux8way(x: Bit, sel: &Bus3) -> [Bit; 8] {
-    let bus2 = Bus2([sel[0], sel[1]]);
+    let bus2 = [sel[0], sel[1]];
     let [s, t, u, v] = dmux4way(x, &bus2);
     let [a, b] = dmux(s, sel[2]);
     let [c, d] = dmux(t, sel[2]);
@@ -175,7 +175,7 @@ mod test {
     }
 
     fn make_bus2(i: usize) -> Bus2 {
-        Bus2([
+        [
             if (i >> 1) % 2 == 0 {
                 Bit::Negative
             } else {
@@ -186,7 +186,7 @@ mod test {
             } else {
                 Bit::Positive
             },
-        ])
+        ]
     }
 }
 

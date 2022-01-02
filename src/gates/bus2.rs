@@ -1,3 +1,3 @@
 use crate::primitive::Bit;
 
-pub struct Bus2(pub [Bit; 2]);
+pub type Bus2 = [Bit; 2];
