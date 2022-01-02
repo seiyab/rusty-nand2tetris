@@ -1,7 +1,6 @@
 use crate::gates::bit;
 use crate::gates::bus16;
 use crate::general::T16;
-use crate::infrastructure::sequential::primitive::Dff;
 use crate::infrastructure::sequential::{
     FeedbackSC, FeedbackSCDef, FeedforwardSC, FeedforwardSCDef, TupleSC2,
 };
@@ -74,7 +73,7 @@ impl FeedforwardSCDef<R16> for Register16Impl {
     }
     fn pre(i: &Self::Input) -> (T16<RegisterInput>, ()) {
         let Self::Input { input, load } = i;
-        let bus16::Bus16(b) = input;
+        let b = input;
         let r = |x: Bit, l: Bit| RegisterInput { input: x, load: l };
         let l = *load;
         (
@@ -91,14 +90,14 @@ impl FeedforwardSCDef<R16> for Register16Impl {
             (),
         )
     }
-    fn post(b: &T16<Bit>, j: &()) -> Self::Output {
+    fn post(b: &T16<Bit>, _: &()) -> Self::Output {
         let (
             (((o0, o1), (o2, o3)), ((o4, o5), (o6, o7))),
             (((o8, o9), (o10, o11)), ((o12, o13), (o14, o15))),
         ) = b;
-        bus16::Bus16([
+        [
             *o0, *o1, *o2, *o3, *o4, *o5, *o6, *o7, *o8, *o9, *o10, *o11, *o12, *o13, *o14, *o15,
-        ])
+        ]
     }
 }
 
@@ -108,7 +107,6 @@ mod tests {
 
     use crate::assert_bit_equals;
     use crate::assert_bus16_equals;
-    use crate::gates::bus16::Bus16;
     use crate::infrastructure::sequential::SequentialCircuit;
 
     #[test]
@@ -134,10 +132,10 @@ mod tests {
     #[test]
     fn register16_works() {
         let (p, n) = (Bit::Positive, Bit::Negative);
-        let fxt1 = Bus16([p; 16]);
-        let fxt2 = Bus16([n; 16]);
-        let fxt3 = Bus16([p, p, n, n, p, p, p, p, n, n, n, n, p, n, p, n]);
-        let fxt4 = Bus16([n, p, p, n, p, p, n, n, p, n, p, n, p, p, n, n]);
+        let fxt1 = [p; 16];
+        let fxt2 = [n; 16];
+        let fxt3 = [p, p, n, n, p, p, p, p, n, n, n, n, p, n, p, n];
+        let fxt4 = [n, p, p, n, p, p, n, n, p, n, p, n, p, p, n, n];
         let r = Register16::new();
         let (o, r) = r.tick(&Register16Input {
             input: fxt1.clone(),

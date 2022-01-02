@@ -22,31 +22,31 @@ fn full_adder(a: Bit, b: Bit, c: Bit) -> AdderOut {
 }
 
 pub fn add16(a: &bus16::Bus16, b: &bus16::Bus16) -> bus16::Bus16 {
-    let AdderOut { sum: x15, carry } = half_adder(a.0[15], b.0[15]);
-    let AdderOut { sum: x14, carry } = full_adder(a.0[14], b.0[14], carry);
-    let AdderOut { sum: x13, carry } = full_adder(a.0[13], b.0[13], carry);
-    let AdderOut { sum: x12, carry } = full_adder(a.0[12], b.0[12], carry);
-    let AdderOut { sum: x11, carry } = full_adder(a.0[11], b.0[11], carry);
-    let AdderOut { sum: x10, carry } = full_adder(a.0[10], b.0[10], carry);
-    let AdderOut { sum: x9, carry } = full_adder(a.0[9], b.0[9], carry);
-    let AdderOut { sum: x8, carry } = full_adder(a.0[8], b.0[8], carry);
-    let AdderOut { sum: x7, carry } = full_adder(a.0[7], b.0[7], carry);
-    let AdderOut { sum: x6, carry } = full_adder(a.0[6], b.0[6], carry);
-    let AdderOut { sum: x5, carry } = full_adder(a.0[5], b.0[5], carry);
-    let AdderOut { sum: x4, carry } = full_adder(a.0[4], b.0[4], carry);
-    let AdderOut { sum: x3, carry } = full_adder(a.0[3], b.0[3], carry);
-    let AdderOut { sum: x2, carry } = full_adder(a.0[2], b.0[2], carry);
-    let AdderOut { sum: x1, carry } = full_adder(a.0[1], b.0[1], carry);
-    let AdderOut { sum: x0, .. } = full_adder(a.0[0], b.0[0], carry);
-    bus16::Bus16([
+    let AdderOut { sum: x15, carry } = half_adder(a[15], b[15]);
+    let AdderOut { sum: x14, carry } = full_adder(a[14], b[14], carry);
+    let AdderOut { sum: x13, carry } = full_adder(a[13], b[13], carry);
+    let AdderOut { sum: x12, carry } = full_adder(a[12], b[12], carry);
+    let AdderOut { sum: x11, carry } = full_adder(a[11], b[11], carry);
+    let AdderOut { sum: x10, carry } = full_adder(a[10], b[10], carry);
+    let AdderOut { sum: x9, carry } = full_adder(a[9], b[9], carry);
+    let AdderOut { sum: x8, carry } = full_adder(a[8], b[8], carry);
+    let AdderOut { sum: x7, carry } = full_adder(a[7], b[7], carry);
+    let AdderOut { sum: x6, carry } = full_adder(a[6], b[6], carry);
+    let AdderOut { sum: x5, carry } = full_adder(a[5], b[5], carry);
+    let AdderOut { sum: x4, carry } = full_adder(a[4], b[4], carry);
+    let AdderOut { sum: x3, carry } = full_adder(a[3], b[3], carry);
+    let AdderOut { sum: x2, carry } = full_adder(a[2], b[2], carry);
+    let AdderOut { sum: x1, carry } = full_adder(a[1], b[1], carry);
+    let AdderOut { sum: x0, .. } = full_adder(a[0], b[0], carry);
+    [
         x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15,
-    ])
+    ]
 }
 
 pub fn inc16(a: &bus16::Bus16) -> bus16::Bus16 {
     add16(
         a,
-        &bus16::Bus16([
+        &[
             Bit::Negative,
             Bit::Negative,
             Bit::Negative,
@@ -63,7 +63,7 @@ pub fn inc16(a: &bus16::Bus16) -> bus16::Bus16 {
             Bit::Negative,
             Bit::Negative,
             Bit::Positive,
-        ]),
+        ],
     )
 }
 
@@ -83,16 +83,16 @@ pub struct AluControl {
 }
 
 pub fn alu(x: &bus16::Bus16, y: &bus16::Bus16, ctrl: AluControl) -> AluOut {
-    let x = bus16::mux(&x, &bus16::Bus16([Bit::Negative; 16]), ctrl.zx);
+    let x = bus16::mux(&x, &[Bit::Negative; 16], ctrl.zx);
     let x = bus16::mux(&x, &bus16::not(&x), ctrl.nx);
-    let y = bus16::mux(&y, &bus16::Bus16([Bit::Negative; 16]), ctrl.zy);
+    let y = bus16::mux(&y, &[Bit::Negative; 16], ctrl.zy);
     let y = bus16::mux(&y, &bus16::not(&y), ctrl.ny);
 
     let out = bus16::mux(&bus16::and(&x, &y), &add16(&x, &y), ctrl.f);
     let out = bus16::mux(&out, &bus16::not(&out), ctrl.no);
 
     let zr = bit::not(bus16::or16way(&out));
-    let ng = out.0[0];
+    let ng = out[0];
     AluOut { out, zr, ng }
 }
 
@@ -102,7 +102,6 @@ mod tests {
     use crate::assert_bit_equals;
     use crate::assert_bus16_equals;
     use crate::gates::bus16::testing::*;
-    use crate::gates::bus16::Bus16;
     use std::ops::Not;
 
     #[test]
@@ -133,10 +132,10 @@ mod tests {
 
     #[test]
     fn make_bus16_works() {
-        assert_bus16_equals!(make_bus16(0), bus16::Bus16([Bit::Negative; 16]));
+        assert_bus16_equals!(make_bus16(0), [Bit::Negative; 16]);
         assert_bus16_equals!(
             make_bus16(1),
-            bus16::Bus16([
+            [
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Negative,
@@ -153,12 +152,12 @@ mod tests {
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Positive,
-            ])
+            ]
         );
-        assert_bus16_equals!(make_bus16(-1), bus16::Bus16([Bit::Positive; 16]));
+        assert_bus16_equals!(make_bus16(-1), [Bit::Positive; 16]);
         assert_bus16_equals!(
             make_bus16(100),
-            bus16::Bus16([
+            [
                 Bit::Negative,
                 Bit::Negative,
                 Bit::Negative,
@@ -175,7 +174,7 @@ mod tests {
                 Bit::Positive,
                 Bit::Negative,
                 Bit::Negative,
-            ])
+            ]
         );
     }
 
