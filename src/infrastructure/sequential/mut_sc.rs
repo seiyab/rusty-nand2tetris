@@ -1,3 +1,5 @@
+use crate::general::Zero;
+
 use super::SequentialCircuit;
 
 // Mutable Sequential Circuit
@@ -10,9 +12,9 @@ pub trait MutSC {
 
 pub struct FreeMutSC<T: SequentialCircuit>(T);
 
-impl<T: SequentialCircuit> FreeMutSC<T> {
-    pub fn new(t: T) -> Self {
-        Self(t)
+impl<T: SequentialCircuit + Zero> Zero for FreeMutSC<T> {
+    fn new() -> Self {
+        Self(T::new())
     }
 }
 

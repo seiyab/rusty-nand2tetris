@@ -72,7 +72,7 @@ impl FeedforwardSCDef<Box<ArraySC8<Ram64>>> for Ram512Impl {
 
 pub struct MutRam512(Box<[MutRam64; 8]>);
 
-impl MutRam512 {
+impl Zero for MutRam512 {
     fn new() -> Self {
         Self(Box::new([
             MutRam64::new(),

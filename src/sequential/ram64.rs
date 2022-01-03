@@ -75,21 +75,6 @@ impl FeedforwardSCDef<ArraySC8<Ram8>> for Ram64Impl {
 
 pub struct MutRam64([FreeMutSC<Ram8>; 8]);
 
-impl MutRam64 {
-    pub fn new() -> Self {
-        Self([
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-            FreeMutSC::new(Ram8::new()),
-        ])
-    }
-}
-
 impl MutSC for MutRam64 {
     type Input = Ram64Input;
     type Output = Bus16;
@@ -120,11 +105,27 @@ impl MutSC for MutRam64 {
     }
 }
 
+impl Zero for MutRam64 {
+    fn new() -> Self {
+        Self([
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+            FreeMutSC::new(),
+        ])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::gates::bus16::testing::*;
     use crate::gates::bus3::testing::*;
+    use crate::general::Zero;
     use crate::infrastructure::sequential::SequentialCircuit;
 
     use crate::assert_bit_equals;
