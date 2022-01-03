@@ -2,7 +2,9 @@ use crate::gates::bit;
 use crate::gates::bus16::{mux8way16, Bus16};
 use crate::gates::bus3::Bus3;
 use crate::general::T8;
-use crate::infrastructure::sequential::{FeedforwardSC, FeedforwardSCDef, TupleSC2};
+use crate::infrastructure::sequential::{
+    FeedforwardSC, FeedforwardSCDef, FreeMutSC, MutSC, TupleSC2,
+};
 use crate::primitive::Bit;
 
 use super::ram8::{Ram8, Ram8Input};
@@ -96,6 +98,53 @@ impl FeedforwardSCDef<R8> for Ram64Impl {
     }
 }
 
+pub struct MutRam64([FreeMutSC<Ram8>; 8]);
+
+impl MutRam64 {
+    pub fn new() -> Self {
+        Self([
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+            FreeMutSC::new(Ram8::new()),
+        ])
+    }
+}
+
+impl MutSC for MutRam64 {
+    type Input = Ram64Input;
+    type Output = Bus16;
+
+    fn tick(&mut self, input: &Self::Input) -> Self::Output {
+        let Ram64Input {
+            address: a,
+            input,
+            load,
+        } = input;
+        let addr_high = [a[0], a[1], a[2]];
+        let addr_low = [a[3], a[4], a[5]];
+        let ram8input = Ram8Input {
+            input: input.clone(),
+            address: addr_low,
+            load: *load,
+        };
+        match addr_high {
+            [Bit::Negative, Bit::Negative, Bit::Negative] => self.0[0].tick(&ram8input),
+            [Bit::Negative, Bit::Negative, Bit::Positive] => self.0[1].tick(&ram8input),
+            [Bit::Negative, Bit::Positive, Bit::Negative] => self.0[2].tick(&ram8input),
+            [Bit::Negative, Bit::Positive, Bit::Positive] => self.0[3].tick(&ram8input),
+            [Bit::Positive, Bit::Negative, Bit::Negative] => self.0[4].tick(&ram8input),
+            [Bit::Positive, Bit::Negative, Bit::Positive] => self.0[5].tick(&ram8input),
+            [Bit::Positive, Bit::Positive, Bit::Negative] => self.0[6].tick(&ram8input),
+            [Bit::Positive, Bit::Positive, Bit::Positive] => self.0[7].tick(&ram8input),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -137,6 +186,38 @@ mod tests {
                 load: Bit::Positive,
             });
             r = rr;
+            assert_bus16_equals!(o, make_bus16(i));
+        }
+    }
+
+    #[test]
+    fn mut_ram64_works() {
+        let mut r = MutRam64::new();
+        for i in 0..8 {
+            let b3 = make_bus3(i);
+            let o = r.tick(&Ram64Input {
+                input: make_bus16(i),
+                address: [b3[0], b3[1], b3[2], b3[0], b3[1], b3[2]],
+                load: Bit::Positive,
+            });
+            assert_bus16_equals!(o, make_bus16(0), format!("addr = {}, {:?}", i, o));
+        }
+        for i in 0..8 {
+            let b3 = make_bus3(i);
+            let o = r.tick(&Ram64Input {
+                input: make_bus16(i),
+                address: [b3[0], b3[1], b3[2], b3[0], b3[1], b3[2]],
+                load: Bit::Negative,
+            });
+            assert_bus16_equals!(o, make_bus16(i));
+        }
+        for i in 0..8 {
+            let b3 = make_bus3(i);
+            let o = r.tick(&Ram64Input {
+                input: make_bus16(-1),
+                address: [b3[0], b3[1], b3[2], b3[0], b3[1], b3[2]],
+                load: Bit::Positive,
+            });
             assert_bus16_equals!(o, make_bus16(i));
         }
     }
