@@ -1,10 +1,11 @@
+use crate::general::Zero;
 use crate::infrastructure::sequential::FuncSC;
 use crate::primitive::Bit;
 
 pub type Dff = FuncSC<'static, Bit, Bit, Bit, fn(&Bit, &Bit) -> (Bit, Bit)>;
 
-impl Dff {
-    pub fn new() -> Self {
+impl Zero for Dff {
+    fn new() -> Self {
         FuncSC::of(Bit::Negative, &(dff_fn as fn(&Bit, &Bit) -> (Bit, Bit)))
     }
 }

@@ -1,16 +1,18 @@
 use std::marker::PhantomData;
 
+use crate::general::Zero;
+use crate::primitive::Bit;
+
 use super::primitive::Dff;
 use super::sequential_circuit::SequentialCircuit;
-use crate::primitive::Bit;
 
 pub struct FeedbackSC<T: FeedbackSCDef> {
     dff: Dff,
     p: PhantomData<T>,
 }
 
-impl<T: FeedbackSCDef> FeedbackSC<T> {
-    pub fn new() -> Self {
+impl<T: FeedbackSCDef> Zero for FeedbackSC<T> {
+    fn new() -> Self {
         Self {
             dff: Dff::new(),
             p: PhantomData,

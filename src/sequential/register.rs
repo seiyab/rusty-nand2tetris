@@ -1,8 +1,8 @@
 use crate::gates::bit;
 use crate::gates::bus16;
-use crate::general::T16;
+use crate::general::Zero;
 use crate::infrastructure::sequential::{
-    FeedbackSC, FeedbackSCDef, FeedforwardSC, FeedforwardSCDef, TupleSC2,
+    ArraySC16, FeedbackSC, FeedbackSCDef, FeedforwardSC, FeedforwardSCDef,
 };
 use crate::primitive::Bit;
 
@@ -30,74 +30,50 @@ impl FeedbackSCDef for RegisterImpl {
 
 pub struct Register16Impl;
 
-type R2 = TupleSC2<Register, Register>;
-type R4 = TupleSC2<R2, R2>;
-type R8 = TupleSC2<R4, R4>;
-type R16 = TupleSC2<R8, R8>;
-
-pub type Register16 = FeedforwardSC<R16, Register16Impl>;
+pub type Register16 = FeedforwardSC<ArraySC16<Register>, Register16Impl>;
 
 pub struct Register16Input {
     pub input: bus16::Bus16,
     pub load: Bit,
 }
 
-impl FeedforwardSCDef<R16> for Register16Impl {
+impl FeedforwardSCDef<ArraySC16<Register>> for Register16Impl {
     type Input = Register16Input;
     type Output = bus16::Bus16;
     type Jump = ();
 
-    fn new() -> R16 {
-        TupleSC2::new(
-            TupleSC2::new(
-                TupleSC2::new(
-                    TupleSC2::new(Register::new(), Register::new()),
-                    TupleSC2::new(Register::new(), Register::new()),
-                ),
-                TupleSC2::new(
-                    TupleSC2::new(Register::new(), Register::new()),
-                    TupleSC2::new(Register::new(), Register::new()),
-                ),
-            ),
-            TupleSC2::new(
-                TupleSC2::new(
-                    TupleSC2::new(Register::new(), Register::new()),
-                    TupleSC2::new(Register::new(), Register::new()),
-                ),
-                TupleSC2::new(
-                    TupleSC2::new(Register::new(), Register::new()),
-                    TupleSC2::new(Register::new(), Register::new()),
-                ),
-            ),
-        )
+    fn new() -> ArraySC16<Register> {
+        ArraySC16::new()
     }
-    fn pre(i: &Self::Input) -> (T16<RegisterInput>, ()) {
+    fn pre(i: &Self::Input) -> ([RegisterInput; 16], ()) {
         let Self::Input { input, load } = i;
         let b = input;
         let r = |x: Bit, l: Bit| RegisterInput { input: x, load: l };
         let l = *load;
         (
-            (
-                (
-                    ((r(b[0], l), r(b[1], l)), (r(b[2], l), r(b[3], l))),
-                    ((r(b[4], l), r(b[5], l)), (r(b[6], l), r(b[7], l))),
-                ),
-                (
-                    ((r(b[8], l), r(b[9], l)), (r(b[10], l), r(b[11], l))),
-                    ((r(b[12], l), r(b[13], l)), (r(b[14], l), r(b[15], l))),
-                ),
-            ),
+            [
+                r(b[0x0], l),
+                r(b[0x1], l),
+                r(b[0x2], l),
+                r(b[0x3], l),
+                r(b[0x4], l),
+                r(b[0x5], l),
+                r(b[0x6], l),
+                r(b[0x7], l),
+                r(b[0x8], l),
+                r(b[0x9], l),
+                r(b[0xa], l),
+                r(b[0xb], l),
+                r(b[0xc], l),
+                r(b[0xd], l),
+                r(b[0xe], l),
+                r(b[0xf], l),
+            ],
             (),
         )
     }
-    fn post(b: &T16<Bit>, _: &()) -> Self::Output {
-        let (
-            (((o0, o1), (o2, o3)), ((o4, o5), (o6, o7))),
-            (((o8, o9), (o10, o11)), ((o12, o13), (o14, o15))),
-        ) = b;
-        [
-            *o0, *o1, *o2, *o3, *o4, *o5, *o6, *o7, *o8, *o9, *o10, *o11, *o12, *o13, *o14, *o15,
-        ]
+    fn post(b: &[Bit; 16], _: &()) -> Self::Output {
+        b.clone()
     }
 }
 

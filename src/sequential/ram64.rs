@@ -1,19 +1,15 @@
 use crate::gates::bit;
 use crate::gates::bus16::{mux8way16, Bus16};
 use crate::gates::bus3::Bus3;
-use crate::general::T8;
+use crate::general::Zero;
 use crate::infrastructure::sequential::{
-    FeedforwardSC, FeedforwardSCDef, FreeMutSC, MutSC, TupleSC2,
+    ArraySC8, FeedforwardSC, FeedforwardSCDef, FreeMutSC, MutSC,
 };
 use crate::primitive::Bit;
 
 use super::ram8::{Ram8, Ram8Input};
 
-pub type R2 = TupleSC2<Ram8, Ram8>;
-pub type R4 = TupleSC2<R2, R2>;
-pub type R8 = TupleSC2<R4, R4>;
-
-pub type Ram64 = FeedforwardSC<R8, Ram64Impl>;
+pub type Ram64 = FeedforwardSC<ArraySC8<Ram8>, Ram64Impl>;
 
 pub struct Ram64Impl;
 
@@ -23,24 +19,15 @@ pub struct Ram64Input {
     pub load: Bit,
 }
 
-impl FeedforwardSCDef<R8> for Ram64Impl {
+impl FeedforwardSCDef<ArraySC8<Ram8>> for Ram64Impl {
     type Input = Ram64Input;
     type Output = Bus16;
     type Jump = Bus3;
 
-    fn new() -> R8 {
-        TupleSC2::new(
-            TupleSC2::new(
-                TupleSC2::new(Ram8::new(), Ram8::new()),
-                TupleSC2::new(Ram8::new(), Ram8::new()),
-            ),
-            TupleSC2::new(
-                TupleSC2::new(Ram8::new(), Ram8::new()),
-                TupleSC2::new(Ram8::new(), Ram8::new()),
-            ),
-        )
+    fn new() -> ArraySC8<Ram8> {
+        ArraySC8::new()
     }
-    fn pre(input: &Self::Input) -> (T8<Ram8Input>, Self::Jump) {
+    fn pre(input: &Self::Input) -> ([Ram8Input; 8], Self::Jump) {
         let Ram64Input {
             input: i,
             address: a,
@@ -66,34 +53,22 @@ impl FeedforwardSCDef<R8> for Ram64Impl {
             bit::and(a11, a[2]),
         ];
         (
-            (
-                (
-                    (
-                        r(&i, bit::and(*load, sel[0])),
-                        r(&i, bit::and(*load, sel[1])),
-                    ),
-                    (
-                        r(&i, bit::and(*load, sel[2])),
-                        r(&i, bit::and(*load, sel[3])),
-                    ),
-                ),
-                (
-                    (
-                        r(&i, bit::and(*load, sel[4])),
-                        r(&i, bit::and(*load, sel[5])),
-                    ),
-                    (
-                        r(&i, bit::and(*load, sel[6])),
-                        r(&i, bit::and(*load, sel[7])),
-                    ),
-                ),
-            ),
+            [
+                r(&i, bit::and(*load, sel[0])),
+                r(&i, bit::and(*load, sel[1])),
+                r(&i, bit::and(*load, sel[2])),
+                r(&i, bit::and(*load, sel[3])),
+                r(&i, bit::and(*load, sel[4])),
+                r(&i, bit::and(*load, sel[5])),
+                r(&i, bit::and(*load, sel[6])),
+                r(&i, bit::and(*load, sel[7])),
+            ],
             [a[0], a[1], a[2]],
         )
     }
-    fn post(buf: &T8<Bus16>, jump: &Self::Jump) -> Self::Output {
+    fn post(buf: &[Bus16; 8], jump: &Self::Jump) -> Self::Output {
         let sel = jump;
-        let (((b0, b1), (b2, b3)), ((b4, b5), (b6, b7))) = buf;
+        let [b0, b1, b2, b3, b4, b5, b6, b7] = buf;
         mux8way16(b0, b1, b2, b3, b4, b5, b6, b7, sel)
     }
 }

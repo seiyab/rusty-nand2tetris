@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use crate::general::Zero;
+
 use super::sequential_circuit::SequentialCircuit;
 
 pub struct FeedforwardSC<S: SequentialCircuit, T: FeedforwardSCDef<S>> {
@@ -7,8 +9,8 @@ pub struct FeedforwardSC<S: SequentialCircuit, T: FeedforwardSCDef<S>> {
     p: PhantomData<T>,
 }
 
-impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> FeedforwardSC<S, T> {
-    pub fn new() -> Self {
+impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> Zero for FeedforwardSC<S, T> {
+    fn new() -> Self {
         Self {
             sc: T::new(),
             p: PhantomData,

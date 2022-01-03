@@ -4,8 +4,8 @@ pub use self::sequential_circuit::SequentialCircuit;
 mod func_sc;
 pub use self::func_sc::*;
 
-mod tuple_sc;
-pub use self::tuple_sc::*;
+mod array_sc;
+pub use self::array_sc::*;
 
 pub mod primitive;
 
