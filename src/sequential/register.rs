@@ -1,6 +1,7 @@
 use crate::gates::bit;
 use crate::gates::bus16;
 use crate::general::Zero;
+use crate::infrastructure::sequential::primitive::Dff;
 use crate::infrastructure::sequential::{
     ArraySC16, FeedbackSC, FeedbackSCDef, FeedforwardSC, FeedforwardSCDef,
 };
@@ -8,23 +9,24 @@ use crate::primitive::Bit;
 
 pub struct RegisterImpl;
 
-pub type Register = FeedbackSC<RegisterImpl>;
+pub type Register = FeedbackSC<Dff, RegisterImpl>;
 
 pub struct RegisterInput {
     pub input: Bit,
     pub load: Bit,
 }
 
-impl FeedbackSCDef for RegisterImpl {
+impl FeedbackSCDef<Dff> for RegisterImpl {
     type Input = RegisterInput;
     type Output = Bit;
+    type Feedback = Bit;
 
-    fn pre(inputs: &Self::Input, output: &Self::Output) -> Bit {
+    fn pre(inputs: &Self::Input, feedback: &Self::Feedback) -> Bit {
         let RegisterInput { input, load } = *inputs;
-        bit::mux(*output, input, load)
+        bit::mux(*feedback, input, load)
     }
-    fn post(buf: Bit) -> Self::Output {
-        buf
+    fn post(_: &Self::Input, buf: &Bit) -> (Self::Output, Self::Feedback) {
+        (*buf, *buf)
     }
 }
 

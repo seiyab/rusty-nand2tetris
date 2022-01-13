@@ -2,6 +2,27 @@ use crate::general::Zero;
 
 use super::sequential_circuit::SequentialCircuit;
 
+pub struct ArraySC3<A: SequentialCircuit>([A; 3]);
+
+impl<A: SequentialCircuit + Zero> Zero for ArraySC3<A> {
+    fn new() -> Self {
+        Self([A::new(), A::new(), A::new()])
+    }
+}
+
+impl<A: SequentialCircuit> SequentialCircuit for ArraySC3<A> {
+    type Input = [A::Input; 3];
+    type Output = [A::Output; 3];
+
+    fn tick(&self, input: &Self::Input) -> (Self::Output, Self) {
+        let Self(a) = self;
+        let (o0, s0) = a[0].tick(&input[0]);
+        let (o1, s1) = a[1].tick(&input[1]);
+        let (o2, s2) = a[2].tick(&input[2]);
+        ([o0, o1, o2], Self([s0, s1, s2]))
+    }
+}
+
 pub struct ArraySC8<A: SequentialCircuit>([A; 8]);
 
 impl<A: SequentialCircuit + Zero> Zero for ArraySC8<A> {

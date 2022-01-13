@@ -1,5 +1,5 @@
 mod register;
-pub use register::{Register16, RegisterInput};
+pub use register::{Register16, Register16Input};
 
 mod ram16k;
 mod ram4k;

@@ -1,3 +1,5 @@
+use crate::general::Zero;
+
 #[derive(Clone, Copy, Debug)]
 pub enum Bit {
     Positive,
@@ -13,6 +15,12 @@ impl Bit {
             },
             Self::Negative => Self::Positive,
         }
+    }
+}
+
+impl Zero for Bit {
+    fn new() -> Self {
+        Self::Negative
     }
 }
 

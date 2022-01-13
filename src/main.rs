@@ -1,5 +1,6 @@
 #![feature(array_zip)]
 
+mod computer;
 mod gates;
 mod general;
 mod infrastructure;

@@ -68,18 +68,18 @@ pub fn inc16(a: &bus16::Bus16) -> bus16::Bus16 {
 }
 
 pub struct AluOut {
-    out: bus16::Bus16,
-    zr: Bit,
-    ng: Bit,
+    pub out: bus16::Bus16,
+    pub zr: Bit,
+    pub ng: Bit,
 }
 
 pub struct AluControl {
-    zx: Bit,
-    nx: Bit,
-    zy: Bit,
-    ny: Bit,
-    f: Bit,
-    no: Bit,
+    pub zx: Bit,
+    pub nx: Bit,
+    pub zy: Bit,
+    pub ny: Bit,
+    pub f: Bit,
+    pub no: Bit,
 }
 
 pub fn alu(x: &bus16::Bus16, y: &bus16::Bus16, ctrl: AluControl) -> AluOut {
