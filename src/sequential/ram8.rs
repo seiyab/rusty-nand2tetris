@@ -112,3 +112,15 @@ mod tests {
         }
     }
 }
+
+pub mod testing {
+    use super::Ram8;
+    use crate::infrastructure::sequential::testing;
+
+    impl Ram8 {
+        pub fn peek_at(&self, i: usize) {
+            self.peek().at(i);
+        }
+    }
+
+}

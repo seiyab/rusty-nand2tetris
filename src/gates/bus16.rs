@@ -171,6 +171,20 @@ pub fn or16way(x: &Bus16) -> Bit {
     )
 }
 
+pub fn into_bus15(x: &Bus16) -> [Bit; 15] {
+    [
+        x[0x1], x[0x2], x[0x3], x[0x4], x[0x5], x[0x6], x[0x7], x[0x8], x[0x9], x[0xa], x[0xb],
+        x[0xc], x[0xd], x[0xe], x[0xf],
+    ]
+}
+
+pub fn into_bus13(x: &Bus16) -> [Bit; 13] {
+    [
+        x[0x3], x[0x4], x[0x5], x[0x6], x[0x7], x[0x8], x[0x9], x[0xa], x[0xb], x[0xc], x[0xd],
+        x[0xe], x[0xf],
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::testing::make_bus16;
@@ -411,6 +425,19 @@ pub mod testing {
         b16
     }
 
+    pub fn into_i32(b: &Bus16) -> i32 {
+        let mut a = 0;
+        for i in 0..16 {
+            match b[i] {
+                Bit::Positive => {
+                    a += 1 << (15 - i);
+                }
+                Bit::Negative => (),
+            }
+        }
+        a
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
@@ -421,6 +448,13 @@ pub mod testing {
         fn make_bus16_works() {
             let a = make_bus16(0);
             assert_bus16_equals!(a, [Bit::Negative; 16], format!("{:?}", a));
+        }
+
+        #[test]
+        fn into_i32_works() {
+            for i in 0..10 {
+                assert_eq!(into_i32(&make_bus16(i)), i);
+            }
         }
     }
 }

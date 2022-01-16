@@ -118,3 +118,13 @@ impl<A: SequentialCircuit> SequentialCircuit for ArraySC16<A> {
         )
     }
 }
+
+pub mod testing {
+    use super::*;
+
+    impl<A: SequentialCircuit> ArraySC8<A> {
+        pub fn at(&self, i: usize) -> &A {
+            &self.0[i]
+        }
+    }
+}

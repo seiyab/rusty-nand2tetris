@@ -147,3 +147,18 @@ mod tests {
         assert_bus16_equals!(&fxt4, &o);
     }
 }
+
+mod testing {
+    use super::*;
+    use crate::infrastructure::sequential::SequentialCircuit;
+
+    impl Register16 {
+        pub fn get(&self) -> bus16::Bus16 {
+            self.tick(&Register16Input {
+                input: bus16::Bus16::new(),
+                load: Bit::Negative,
+            })
+            .0
+        }
+    }
+}

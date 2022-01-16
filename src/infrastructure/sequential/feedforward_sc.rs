@@ -39,3 +39,13 @@ impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> SequentialCircuit for Feedfor
         (out, Self { sc, p: PhantomData })
     }
 }
+
+pub mod testing {
+    use super::*;
+
+    impl<S: SequentialCircuit, T: FeedforwardSCDef<S>> FeedforwardSC<S, T> {
+        pub fn peek(&self) -> &S {
+            &self.sc
+        }
+    }
+}

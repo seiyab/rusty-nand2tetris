@@ -1,4 +1,5 @@
 #![feature(array_zip)]
+#![feature(assert_matches)]
 
 mod computer;
 mod gates;
