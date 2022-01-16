@@ -5,6 +5,7 @@ mod computer;
 mod gates;
 mod general;
 mod infrastructure;
+mod instruction;
 mod primitive;
 mod sequential;
 

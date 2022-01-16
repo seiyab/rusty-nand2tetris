@@ -52,9 +52,9 @@ impl MutSC for MutComputer {
 #[cfg(test)]
 mod tests {
     use crate::gates::bus16::testing::into_i32;
+    use crate::instruction::*;
 
     use super::super::cpu::testing::CpuDebug;
-    use super::super::instruction::*;
     use super::*;
 
     #[test]

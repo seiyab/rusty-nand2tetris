@@ -1,5 +1,3 @@
-pub mod instruction;
-
 mod cpu;
 pub use cpu::*;
 

@@ -128,8 +128,9 @@ impl FeedforwardSCDef<CpuRegisters> for CpuDef {
 }
 
 pub mod testing {
+    use crate::instruction::*;
+
     use super::*;
-    use crate::computer::instruction::*;
 
     pub trait CpuDebug {
         fn peek_data(&self) -> Bus16;
@@ -204,8 +205,8 @@ pub mod testing {
 mod test {
     use super::*;
 
-    use crate::computer::instruction::*;
     use crate::gates::bus16::testing::{into_i32, make_bus16};
+    use crate::instruction::*;
 
     use super::testing::CpuDebug;
 
