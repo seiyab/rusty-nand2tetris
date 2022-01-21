@@ -1,11 +1,12 @@
-#![feature(array_zip)]
-#![feature(assert_matches)]
+#![feature(array_zip, assert_matches, map_try_insert)]
 
+mod assembly;
 mod computer;
 mod gates;
 mod general;
 mod infrastructure;
 mod instruction;
+mod parser;
 mod primitive;
 mod sequential;
 

@@ -55,6 +55,7 @@ mod tests {
     use crate::instruction::*;
 
     use super::super::cpu::testing::CpuDebug;
+    use super::testing::ComputerDebug;
     use super::*;
 
     #[test]
@@ -562,17 +563,28 @@ mod tests {
     }
 }
 
-mod testing {
+pub mod testing {
+    use crate::gates::bus16::testing::into_i32;
+
     use super::super::memory::testing;
     use super::*;
 
-    impl MutComputer {
-        pub fn of(instructions: &Vec<Bus16>) -> Self {
+    pub trait ComputerDebug {
+        fn of(instructions: &Vec<Bus16>) -> Self;
+        fn peek_ram(&mut self, addr: i32) -> i32;
+    }
+
+    impl ComputerDebug for MutComputer {
+        fn of(instructions: &Vec<Bus16>) -> Self {
             MutComputer {
                 rom: MutRom::of(instructions),
                 ram: MutDataMemory::new(),
                 cpu: Cpu::new(),
             }
+        }
+
+        fn peek_ram(&mut self, addr: i32) -> i32 {
+            into_i32(&self.ram.peek(addr))
         }
     }
 }

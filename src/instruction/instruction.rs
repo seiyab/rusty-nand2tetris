@@ -3,22 +3,26 @@ use crate::primitive::Bit;
 
 use crate::gates::bus16::testing::make_bus16;
 
+#[derive(Debug)]
 pub enum Instruction {
     A(i32),
     C(Computation),
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct Computation {
     pub comp: (CompReg, Comp),
     pub dest: Dest,
     pub jump: Jump,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum CompReg {
     A,
     M,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum Comp {
     Zero,
     One,
@@ -40,6 +44,7 @@ pub enum Comp {
     DOrA,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum Jump {
     None,
     Eq,
@@ -52,10 +57,14 @@ pub enum Jump {
     Always,
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Dest {
     A,
+    AD,
+    AM,
+    ADM,
     D,
+    DM,
     M,
     None,
 }
@@ -102,9 +111,18 @@ impl Instruction {
                     x[3],
                     x[4],
                     x[5],
-                    b(c.dest == Dest::A),
-                    b(c.dest == Dest::D),
-                    b(c.dest == Dest::M),
+                    b(match c.dest {
+                        Dest::A | Dest::AD | Dest::AM | Dest::ADM => true,
+                        _ => false,
+                    }),
+                    b(match c.dest {
+                        Dest::AD | Dest::ADM | Dest::D | Dest::DM => true,
+                        _ => false,
+                    }),
+                    b(match c.dest {
+                        Dest::AM | Dest::ADM | Dest::DM | Dest::M => true,
+                        _ => false,
+                    }),
                     b(match c.jump {
                         Jump::Le | Jump::Lt | Jump::Ne | Jump::NEq | Jump::Always => true,
                         _ => false,
